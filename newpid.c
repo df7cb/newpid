@@ -21,7 +21,7 @@
  * IN THE SOFTWARE.
  */
 
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+#define _GNU_SOURCE
 #include <sched.h>
 #include <signal.h>
 #include <stdio.h>
@@ -45,21 +45,20 @@ run (void *argv_void)
 	}
 
 	char *const *argv = argv_void;
+	argv++; /* skip argv[0] */
 
-	char *argv_sh[] = { NULL, NULL, NULL };
-	if (argv[1] == NULL) {
+	char *argv_sh[] = { NULL, NULL };
+	if (argv[0] == NULL) {
 		char *shell = getenv ("SHELL");
 		if (shell) {
 			argv_sh[0] = shell;
-			argv_sh[1] = shell;
 		} else {
 			argv_sh[0] = "/bin/sh";
-			argv_sh[1] = "/bin/sh";
 		}
 		argv = argv_sh;
 	}
 
-	if (execvp (argv[1], argv + 1) < 0) {
+	if (execvp (argv[0], argv) < 0) {
 		perror ("execvp");
 		exit (1);
 	}
