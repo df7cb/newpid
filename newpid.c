@@ -34,6 +34,9 @@
 int
 run (void *argv_void)
 {
+	char *const *argv = argv_void;
+	char *argv_sh[] = { NULL, NULL };
+
 	if (umount ("/proc") != 0) {
 		perror ("umount /proc");
 		exit (1);
@@ -44,17 +47,13 @@ run (void *argv_void)
 		exit (1);
 	}
 
-	char *const *argv = argv_void;
-	argv++; /* skip argv[0] */
-
-	char *argv_sh[] = { NULL, NULL };
 	if (argv[0] == NULL) {
 		char *shell = getenv ("SHELL");
-		if (shell) {
+
+		if (shell)
 			argv_sh[0] = shell;
-		} else {
+		else
 			argv_sh[0] = "/bin/sh";
-		}
 		argv = argv_sh;
 	}
 
@@ -70,14 +69,19 @@ run (void *argv_void)
 int
 main (int argc, char *argv[], char *envp[])
 {
-	int child;
 	char cstack[2048];
-	if ((child = clone (run, cstack + 1024, CLONE_NEWPID | CLONE_NEWNS | SIGCHLD, argv)) < 0) {
+	int child;
+	int status;
+
+	if ((child = clone (run,
+			cstack + 1024, /* middle of array so we don't care which way the stack grows */
+			CLONE_NEWPID | CLONE_NEWNS | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
+			argv + 1) /* skip argv[0] */
+	) < 0) {
 		perror ("clone");
 		exit (1);
 	}
 
-	int status;
 	wait (&status);
 
 	return WEXITSTATUS (status);
