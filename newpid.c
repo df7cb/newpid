@@ -31,6 +31,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+void
+reaper (int signal)
+{
+	// printf ("caught signal %d\n", signal);
+}
+
 int
 run (void *argv_void)
 {
@@ -59,9 +65,9 @@ run (void *argv_void)
 	}
 
 	struct sigaction sa;
-	sa.sa_handler = SIG_DFL;
+	sa.sa_handler = reaper;
 	sigemptyset (&sa.sa_mask);
-	sa.sa_flags = SA_NOCLDWAIT;
+	sa.sa_flags = 0;
 	sigaction (SIGCHLD, &sa, NULL);
 
 	if ((child = fork ()) == 0) {
@@ -71,11 +77,20 @@ run (void *argv_void)
 		}
 		/* NOT REACHED */
 	}
+	if (child < 0) {
+		perror ("fork");
+		exit (1);
+	}
 
 	int status;
-	waitpid (child, &status, 0);
+	if (waitpid (child, &status, 0) < 0)
+		perror ("waitpid");
 
-	return WEXITSTATUS (status);
+	if (WIFEXITED (status))
+		return WEXITSTATUS (status);
+	if (WIFSIGNALED (status))
+		return 128 + WTERMSIG (status);
+	return -1;
 }
 
 int
@@ -96,5 +111,9 @@ main (int argc, char *argv[], char *envp[])
 
 	wait (&status);
 
-	return WEXITSTATUS (status);
+	if (WIFEXITED (status))
+		return WEXITSTATUS (status);
+	if (WIFSIGNALED (status))
+		return 128 + WTERMSIG (status);
+	return -1;
 }
