@@ -22,6 +22,7 @@
  */
 
 #define _GNU_SOURCE
+#include <errno.h>
 #include <sched.h>
 #include <signal.h>
 #include <stdio.h>
@@ -83,8 +84,13 @@ run (void *argv_void)
 	}
 
 	int status;
-	if (waitpid (child, &status, 0) < 0)
-		perror ("waitpid");
+	while (waitpid (child, &status, 0) < 0) {
+		if (errno != EINTR) {
+			perror ("waitpid");
+			exit (1);
+		}
+		/* ignore SIGCHLD for other children and retry */
+	}
 
 	if (WIFEXITED (status))
 		return WEXITSTATUS (status);
