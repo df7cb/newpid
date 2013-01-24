@@ -36,6 +36,7 @@ run (void *argv_void)
 {
 	char *const *argv = argv_void;
 	char *argv_sh[] = { NULL, NULL };
+	pid_t child;
 
 	if (umount ("/proc") != 0) {
 		perror ("umount /proc");
@@ -57,13 +58,24 @@ run (void *argv_void)
 		argv = argv_sh;
 	}
 
-	if (execvp (argv[0], argv) < 0) {
-		perror ("execvp");
-		exit (1);
+	struct sigaction sa;
+	sa.sa_handler = SIG_DFL;
+	sigemptyset (&sa.sa_mask);
+	sa.sa_flags = SA_NOCLDWAIT;
+	sigaction (SIGCHLD, &sa, NULL);
+
+	if ((child = fork ()) == 0) {
+		if (execvp (argv[0], argv) < 0) {
+			perror ("execvp");
+			exit (1);
+		}
+		/* NOT REACHED */
 	}
 
-	/* NOT REACHED */
-	return 0;
+	int status;
+	waitpid (child, &status, 0);
+
+	return WEXITSTATUS (status);
 }
 
 int
