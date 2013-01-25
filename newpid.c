@@ -32,18 +32,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void
-reaper (int signal)
-{
-	// printf ("caught signal %d\n", signal);
-}
-
 int
 run (void *argv_void)
 {
 	char *const *argv = argv_void;
 	char *argv_sh[] = { NULL, NULL };
 	pid_t child;
+	pid_t pid;
 
 	if (umount ("/proc") != 0) {
 		perror ("umount /proc");
@@ -65,12 +60,6 @@ run (void *argv_void)
 		argv = argv_sh;
 	}
 
-	struct sigaction sa;
-	sa.sa_handler = reaper;
-	sigemptyset (&sa.sa_mask);
-	sa.sa_flags = 0;
-	sigaction (SIGCHLD, &sa, NULL);
-
 	if ((child = fork ()) == 0) {
 		if (execvp (argv[0], argv) < 0) {
 			perror ("execvp");
@@ -84,12 +73,13 @@ run (void *argv_void)
 	}
 
 	int status;
-	while (waitpid (child, &status, 0) < 0) {
-		if (errno != EINTR) {
+	while ((pid = wait (&status)) != child) {
+		if (pid < 0 && errno != EINTR) {
 			perror ("waitpid");
 			exit (1);
 		}
 		/* ignore SIGCHLD for other children and retry */
+		// printf ("Reaped child %d with status %d\n", pid, status);
 	}
 
 	if (WIFEXITED (status))
@@ -115,7 +105,7 @@ main (int argc, char *argv[], char *envp[])
 		exit (1);
 	}
 
-	wait (&status);
+	waitpid (child, &status, 0);
 
 	if (WIFEXITED (status))
 		return WEXITSTATUS (status);
