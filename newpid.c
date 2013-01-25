@@ -105,7 +105,9 @@ main (int argc, char *argv[], char *envp[])
 		exit (1);
 	}
 
-	waitpid (child, &status, 0);
+	if (waitpid (child, &status, 0) < 0) {
+		perror ("waitpid");
+	}
 
 	if (WIFEXITED (status))
 		return WEXITSTATUS (status);
