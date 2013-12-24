@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian PostgreSQL Maintainers <pkg-postgresql-public@lists.alioth.debian.org>
 Uploaders: Christoph Berg <myon@debian.org>
 Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 8~)
+Build-Depends: debhelper (>= 9~)
 Vcs-Browser: https://github.com/ChristophBerg/newpid
 Vcs-Git: git://github.com/ChristophBerg/newpid.git
 XS-Testsuite: autopkgtest

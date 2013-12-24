@@ -1,5 +1,4 @@
-CC = cc
-CFLAGS = -g -O2 -Wall -Werror
+CFLAGS += -g -O2 -Wall -Werror
 PREFIX = /usr
 
 newpid: newpid.o

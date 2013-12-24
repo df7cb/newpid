@@ -1,6 +1,7 @@
 newpid (2) UNRELEASED; urgency=low
 
   * Add autopkgtest.
+  * Enable build hardening.
 
  -- Christoph Berg <myon@debian.org>  Tue, 24 Dec 2013 11:58:27 +0200
 
