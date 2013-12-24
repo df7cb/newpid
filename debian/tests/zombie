@@ -3,4 +3,5 @@
 set -eu
 
 newpid ./zombie.pl 2>&1 | tee z.out
+[ "${distribution:-}" = "lucid" ] && sed -i -e '1,/version code/d' z.out  # remove "Non-standard uts for running kernel"
 diff -u z.expected z.out
