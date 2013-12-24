@@ -1,3 +1,9 @@
+newpid (2) UNRELEASED; urgency=low
+
+  * Add autopkgtest.
+
+ -- Christoph Berg <myon@debian.org>  Tue, 24 Dec 2013 11:58:27 +0200
+
 newpid (1) UNRELEASED; urgency=low
 
   * Initial release.

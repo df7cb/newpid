@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+newpid ./zombie.pl 2>&1 | tee z.out
+diff -u z.expected z.out

@@ -9,4 +9,4 @@ install: newpid
 	install newpid $(DESTDIR)$(PREFIX)/bin/newpid
 
 clean:
-	rm -f newpid newpid.o
+	rm -f newpid newpid.o z.out

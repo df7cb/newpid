@@ -1,0 +1,5 @@
+  PID TTY      STAT   TIME COMMAND
+    1 pts/2    S+     0:00 newpid ./zombie.pl
+    2 pts/2    S+     0:00 /usr/bin/perl ./zombie.pl
+    3 pts/2    Z+     0:00  \_ [zombie.pl] <defunct>
+    5 pts/2    R+     0:00  \_ ps xf

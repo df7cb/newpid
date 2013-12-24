@@ -1,0 +1,9 @@
+.*.swp
+newpid
+newpid.o
+z.out
+
+debian/files
+debian/newpid/
+debian/*.log
+debian/*.substvars

@@ -15,5 +15,5 @@ if (fork == 0) {
 } else {
 	sleep 2;
 	system "ps xf";
-	exit 3;
+	exit 0;
 }

@@ -1,0 +1,3 @@
+Depends: @
+Tests: zombie
+Restrictions: needs-root
