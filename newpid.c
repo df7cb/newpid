@@ -1,6 +1,6 @@
 /*
  * newpid: launch a subprocess in a new PID namespace
- * Copyright (C) 2013 Christoph Berg <myon@debian.org>
+ * Copyright (C) 2013, 2014 Christoph Berg <myon@debian.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -41,8 +41,10 @@ run (void *argv_void)
 	pid_t pid;
 
 	if (umount ("/proc") != 0) {
+		/* ignore errors here, /proc could be busy
 		perror ("umount /proc");
 		exit (1);
+		*/
 	}
 
 	if (mount ("proc", "/proc", "proc", 0, NULL) != 0) {
