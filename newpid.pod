@@ -1,0 +1,31 @@
+=head1 NAME
+
+newpid - launch a command in a new PID namespace
+
+=head1 SYNOPSIS
+
+B<newpid> I<command>
+
+=head1 DESCRIPTION
+
+B<newpid> uses the B<clone(CLONE_NEWPID)> syscall to launch a command in a new
+PID namespace. The B</proc> filesystem is also remounted so the new process IDs are also visible there.
+
+=head1 OPTIONS
+
+None.
+
+=head1 EXAMPLE
+
+ $ sudo newpid ps aux
+ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+ root         1  0.0  0.0   4080    84 pts/3    S+   12:15   0:00 newpid ps aux
+ root         2  0.0  0.0  19984  1316 pts/3    R+   12:15   0:00 ps aux
+
+=head1 SEE ALSO
+
+clone(2), unshare(1).
+
+=head1 AUTHOR
+
+Christoph Berg <myon@debian.org>

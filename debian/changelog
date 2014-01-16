@@ -3,6 +3,7 @@ newpid (2) UNRELEASED; urgency=low
   * Add autopkgtest.
   * Enable build hardening.
   * Ignore errors on umount("/proc"), it could be busy.
+  * Add manpage.
 
  -- Christoph Berg <christoph.berg@credativ.de>  Thu, 09 Jan 2014 12:00:41 +0100
 

@@ -1,6 +1,7 @@
 .*.swp
 newpid
 newpid.o
+newpid.1
 z.out
 
 debian/files
