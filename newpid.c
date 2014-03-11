@@ -40,11 +40,9 @@ run (void *argv_void)
 	pid_t child;
 	pid_t pid;
 
-	if (umount ("/proc") != 0) {
-		/* ignore errors here, /proc could be busy
-		perror ("umount /proc");
+	if (mount("none", "/proc", NULL, MS_PRIVATE|MS_REC, NULL) != 0) {
+		perror ("remount proc private");
 		exit (1);
-		*/
 	}
 
 	if (mount ("proc", "/proc", "proc", 0, NULL) != 0) {

@@ -1,3 +1,10 @@
+newpid (3) unstable; urgency=medium
+
+  * Remount /proc to be private so it doesn't break when running under systemd.
+    Patch by Michael Stapelberg, thanks! (See #739593)
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Mon, 10 Mar 2014 15:18:41 +0100
+
 newpid (2) unstable; urgency=low
 
   * Add autopkgtest.
