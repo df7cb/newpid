@@ -1,3 +1,9 @@
+newpid (4) unstable; urgency=medium
+
+  * Make /proc a slave mount as suggested by Lennart Poettering.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 12 Mar 2014 13:30:05 +0100
+
 newpid (3) unstable; urgency=medium
 
   * Remount /proc to be private so it doesn't break when running under systemd.

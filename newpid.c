@@ -32,6 +32,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+/* squeeze's and lucid's libc do not expose these: */
+#ifndef MS_REC
+#define MS_REC 16384
+#endif
+#ifndef MS_SLAVE
+#define MS_SLAVE (1<<19)
+#endif
+
 int
 run (void *argv_void)
 {
@@ -40,7 +48,7 @@ run (void *argv_void)
 	pid_t child;
 	pid_t pid;
 
-	if (mount("none", "/proc", NULL, MS_PRIVATE|MS_REC, NULL) != 0) {
+	if (mount("none", "/proc", NULL, MS_SLAVE|MS_REC, NULL) != 0) {
 		perror ("remount proc private");
 		exit (1);
 	}
