@@ -2,6 +2,9 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
+override_dh_auto_test:
+	# skipping test at build time, needs packages installed
+
 override_dh_fixperms:
 	dh_fixperms --exclude newpid
 
