@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# This could be "Test-Command: make check" in the control file, but adt 2.6 doesn't have that yet
+
+make check
