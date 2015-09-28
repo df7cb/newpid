@@ -1,6 +1,6 @@
 /*
  * newpid: launch a subprocess in a new PID namespace
- * Copyright (C) 2013, 2014 Christoph Berg <myon@debian.org>
+ * Copyright (C) 2013-2015 Christoph Berg <myon@debian.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -40,6 +40,8 @@
 #define MS_SLAVE (1<<19)
 #endif
 
+int newnet = 0;
+
 int
 run (void *argv_void)
 {
@@ -56,6 +58,16 @@ run (void *argv_void)
 	if (mount ("proc", "/proc", "proc", 0, NULL) != 0) {
 		perror ("mount proc");
 		exit (1);
+	}
+
+	if (newnet) {
+		if (! access("/bin/ip", X_OK)) {
+			system ("/bin/ip link set dev lo up");
+		} else if (! access("/sbin/ifconfig", X_OK)) {
+			system ("/sbin/ifconfig lo up");
+		} else {
+			fprintf (stderr, "Warning: Could not set lo device up\n");
+		}
 	}
 
 	if (argv[0] == NULL) {
@@ -100,14 +112,27 @@ run (void *argv_void)
 int
 main (int argc, char *argv[], char *envp[])
 {
+	int opt;
+	while ((opt = getopt(argc, argv, "+n")) != -1) {
+		switch (opt) {
+			case 'n':
+				newnet = CLONE_NEWNET;
+				break;
+			default: /* '?' */
+				fprintf(stderr, "Usage: %s [-n] [command args ...]\n",
+						argv[0]);
+				exit(EXIT_FAILURE);
+		}
+	}
+
 	char cstack[2048];
 	int child;
 	int status;
 
 	if ((child = clone (run,
 			cstack + 1024, /* middle of array so we don't care which way the stack grows */
-			CLONE_NEWPID | CLONE_NEWNS | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
-			argv + 1) /* skip argv[0] */
+			CLONE_NEWPID | CLONE_NEWNS | newnet | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
+			argv + optind) /* skip argv[0] and options */
 	) < 0) {
 		perror ("clone");
 		exit (1);

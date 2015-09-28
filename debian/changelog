@@ -1,3 +1,9 @@
+newpid (5) UNRELEASED; urgency=medium
+
+  * newpid -n uses CLONE_NEWNET to start a new network namespace.
+
+ -- Christoph Berg <myon@debian.org>  Mon, 28 Sep 2015 11:25:47 +0200
+
 newpid (4) unstable; urgency=medium
 
   * Make /proc a slave mount as suggested by Lennart Poettering.

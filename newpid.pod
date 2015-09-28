@@ -4,16 +4,23 @@ newpid - launch a command in a new PID namespace
 
 =head1 SYNOPSIS
 
-B<newpid> I<command>
+B<newpid> [B<-n>] I<command>
 
 =head1 DESCRIPTION
 
 B<newpid> uses the B<clone(CLONE_NEWPID)> syscall to launch a command in a new
-PID namespace. The B</proc> filesystem is also remounted so the new process IDs are also visible there.
+PID namespace. The B</proc> filesystem is remounted so the new process IDs are
+also visible there.
 
 =head1 OPTIONS
 
-None.
+=over 4
+
+=item B<-n>
+
+Use B<CLONE_NEWNET> to run in a new network namespace.
+
+=back
 
 =head1 EXAMPLE
 

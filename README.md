@@ -1,18 +1,30 @@
 newpid
 ======
 
-Very simple wrapper around clone(CLONE_NEWPID) that launches a command in a new
-PID namespace. /proc is also remounted so it sees the new process space. Needs
-root to run.
+Newpid is a simple wrapper around clone(CLONE_NEWPID) that launches a command
+in a new PID namespace. Child processes exiting are properly reaped so no
+zombie processes stay around. /proc is also remounted so it sees the new
+process space; CLONE_NEWNS is used to make sure this doesn't affect the host
+system. Needs root to run.
+
+With -n, CLONE_NEWNET starts a new network namespace. This can be used to test
+multiple daemons that all use the same local port at the same time.
 
 I haven't seen this functionality as a standalone command elsewhere. If you
 find something else, please let me know.
 
-Example: $ sudo newpid ps aux
+Examples:
 <pre>
+$ sudo newpid ps aux
 USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 root         1  0.0  0.0   4080    84 pts/3    S+   12:15   0:00 newpid ps aux
 root         2  0.0  0.0  19984  1316 pts/3    R+   12:15   0:00 ps aux
+</pre>
+
+<pre>
+$ sudo newpid -n ip link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 </pre>
 
  -- Christoph Berg <myon@debian.org>
