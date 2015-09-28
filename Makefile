@@ -16,5 +16,9 @@ install: newpid newpid.1
 	install newpid.1 $(DESTDIR)$(PREFIX)/share/man/man1/newpid.1
 	install newnet.1 $(DESTDIR)$(PREFIX)/share/man/man1/newnet.1
 
+check:
+	$(MAKE) -C test check
+
 clean:
-	rm -f newpid newpid.o newpid.1 newnet.1 z.out
+	rm -f newpid newpid.o newpid.1 newnet.1
+	$(MAKE) -C test clean

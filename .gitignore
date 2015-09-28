@@ -2,7 +2,6 @@
 newpid
 newpid.o
 *.1
-z.out
 
 debian/files
 debian/newpid/

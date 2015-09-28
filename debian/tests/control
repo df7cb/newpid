@@ -1,3 +1,2 @@
-Depends: @
-Tests: zombie
-Restrictions: needs-root
+Depends: @, iputils-ping
+Test-Command: make check
