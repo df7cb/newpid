@@ -24,10 +24,14 @@ Use B<CLONE_NEWNET> to run in a new network namespace.
 
 =head1 EXAMPLE
 
- $ sudo newpid ps aux
+ $ newpid ps aux
  USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
- root         1  0.0  0.0   4080    84 pts/3    S+   12:15   0:00 newpid ps aux
- root         2  0.0  0.0  19984  1316 pts/3    R+   12:15   0:00 ps aux
+ myon         1  0.0  0.0   4080    84 pts/3    S+   12:15   0:00 newpid ps aux
+ myon         2  0.0  0.0  19984  1316 pts/3    R+   12:15   0:00 ps aux
+
+ $ ./newpid -n ip link
+ 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default
+     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
 
 =head1 SEE ALSO
 

@@ -1,6 +1,8 @@
 newpid (5) UNRELEASED; urgency=medium
 
   * newpid -n uses CLONE_NEWNET to start a new network namespace.
+  * Add "newnet" wrapper for "newpid -n".
+  * Allow suid operation and drop privileges.
 
  -- Christoph Berg <myon@debian.org>  Mon, 28 Sep 2015 11:25:47 +0200
 

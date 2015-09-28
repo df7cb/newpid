@@ -60,14 +60,23 @@ run (void *argv_void)
 		exit (1);
 	}
 
+	/* set loopback device up */
 	if (newnet) {
-		if (! access("/bin/ip", X_OK)) {
-			system ("/bin/ip link set dev lo up");
-		} else if (! access("/sbin/ifconfig", X_OK)) {
-			system ("/sbin/ifconfig lo up");
+		if (access("/bin/ip", X_OK) == 0) {
+			if (system ("/bin/ip link set dev lo up") != 0)
+				fprintf (stderr, "Warning: ip link set dev lo up failed\n");
+		} else if (access("/sbin/ifconfig", X_OK) == 0) {
+			if (system ("/sbin/ifconfig lo up") != 0)
+				fprintf (stderr, "Warning: ifconfig lo up failed\n");
 		} else {
 			fprintf (stderr, "Warning: Could not set lo device up\n");
 		}
+	}
+
+	/* drop privileges */
+	if (setuid(getuid()) != 0) {
+		perror ("setuid");
+		exit (1);
 	}
 
 	if (argv[0] == NULL) {

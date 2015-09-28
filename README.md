@@ -5,7 +5,8 @@ Newpid is a simple wrapper around clone(CLONE_NEWPID) that launches a command
 in a new PID namespace. Child processes exiting are properly reaped so no
 zombie processes stay around. /proc is also remounted so it sees the new
 process space; CLONE_NEWNS is used to make sure this doesn't affect the host
-system. Needs root to run.
+system. Newpid can safely be installed as a suid binary, it will drop
+privileges after executing the necessary system calls.
 
 With -n, CLONE_NEWNET starts a new network namespace. This can be used to test
 multiple daemons that all use the same local port at the same time.
