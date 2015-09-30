@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+case $1 in
+	configure)
+		setcap "CAP_SYS_ADMIN,CAP_NET_ADMIN=pe" /usr/bin/newpid
+		;;
+esac
+
+#DEBHELPER#

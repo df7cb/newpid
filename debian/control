@@ -10,7 +10,7 @@ XS-Testsuite: autopkgtest
 
 Package: newpid
 Architecture: linux-any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libcap2-bin, ${shlibs:Depends}, ${misc:Depends}
 Description: run a command in a new PID namespace
  newpid is a simple suid wrapper around clone(CLONE_NEWPID) that launches a
  command in a new PID namespace. Optionally it can also use CLONE_NEWNET to
