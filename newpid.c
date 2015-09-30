@@ -2,23 +2,15 @@
  * newpid: launch a subprocess in a new PID namespace
  * Copyright (C) 2013-2015 Christoph Berg <myon@debian.org>
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 
 #define _GNU_SOURCE
@@ -27,10 +19,13 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mount.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <linux/if.h>
 
 /* squeeze's and lucid's libc do not expose these: */
 #ifndef MS_REC
@@ -40,7 +35,55 @@
 #define MS_SLAVE (1<<19)
 #endif
 
+/* global flags */
 int newnet = 0;
+
+/* get_ctl_fd and do_chflags from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
+static int
+get_ctl_fd (void)
+{
+	int s_errno;
+	int fd;
+
+	fd = socket(PF_INET, SOCK_DGRAM, 0);
+	if (fd >= 0)
+		return fd;
+	s_errno = errno;
+	fd = socket(PF_PACKET, SOCK_DGRAM, 0);
+	if (fd >= 0)
+		return fd;
+	fd = socket(PF_INET6, SOCK_DGRAM, 0);
+	if (fd >= 0)
+		return fd;
+	errno = s_errno;
+	perror("Cannot create control socket");
+	return -1;
+}
+
+static int
+do_chflags (const char *dev, unsigned long flags, unsigned long mask)
+{
+	struct ifreq ifr;
+	int fd;
+
+	strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+	if ((fd = get_ctl_fd()) < 0)
+		return -1;
+	if (ioctl(fd, SIOCGIFFLAGS, &ifr) != 0) {
+		perror("SIOCGIFFLAGS");
+		return -1;
+	}
+	if ((ifr.ifr_flags^flags)&mask) {
+		ifr.ifr_flags &= ~mask;
+		ifr.ifr_flags |= mask&flags;
+		if (ioctl(fd, SIOCSIFFLAGS, &ifr) != 0) {
+			perror("SIOCSIFFLAGS");
+			return -1;
+		}
+	}
+	close(fd);
+	return 0;
+}
 
 int
 run (void *argv_void)
@@ -62,15 +105,8 @@ run (void *argv_void)
 
 	/* set loopback device up */
 	if (newnet) {
-		if (access("/bin/ip", X_OK) == 0) {
-			if (system ("/bin/ip link set dev lo up") != 0)
-				fprintf (stderr, "Warning: ip link set dev lo up failed\n");
-		} else if (access("/sbin/ifconfig", X_OK) == 0) {
-			if (system ("/sbin/ifconfig lo up") != 0)
-				fprintf (stderr, "Warning: ifconfig lo up failed\n");
-		} else {
-			fprintf (stderr, "Warning: Could not set lo device up\n");
-		}
+		if (do_chflags ("lo", IFF_UP, IFF_UP) < 0)
+			exit (1);
 	}
 
 	/* drop privileges */
