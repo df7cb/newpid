@@ -14,6 +14,8 @@ multiple daemons that all use the same local port at the same time. Invoking
 
 With -i, CLONE_NEWIPC starts a new IPC namespace.
 
+With -u, CLONE_NEWUTS starts a new UTS namespace.
+
 Needed capabilities are CAP_SYS_ADMIN and CAP_NET_ADMIN. Alternatively, newpid
 will drop privileges when installed suid root.
 

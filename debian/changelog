@@ -1,6 +1,7 @@
 newpid (6) UNRELEASED; urgency=medium
 
-  * Add support for CLONE_NEWIPC (newpid -i), and have newnet use it.
+  * Add support for CLONE_NEWIPC and CLONE_NEWUTS (newpid -iu), and have
+    newnet use it.
 
  -- Christoph Berg <christoph.berg@credativ.de>  Wed, 07 Oct 2015 09:44:10 +0200
 

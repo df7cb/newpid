@@ -8,7 +8,7 @@ B<newnet> I<command>
 
 =head1 DESCRIPTION
 
-B<newnet> is a wrapper around B<netpid -in> for use in situations where only a
+B<newnet> is a wrapper around B<netpid -inu> for use in situations where only a
 simple executable without options can be used, e.g. in B<sbuild>'s
 B<$build_env_cmnd> setting.
 

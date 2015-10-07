@@ -4,7 +4,7 @@ newpid - launch a command in a new PID namespace
 
 =head1 SYNOPSIS
 
-B<newpid> [B<-in>] I<command>
+B<newpid> [B<-inu>] I<command>
 
 =head1 DESCRIPTION
 
@@ -23,6 +23,10 @@ Use B<CLONE_NEWIPC> to run in a new IPC namespace.
 =item B<-n>
 
 Use B<CLONE_NEWNET> to run in a new network namespace.
+
+=item B<-u>
+
+Use B<CLONE_NEWUTS> to run in a new UTS namespace.
 
 =back
 

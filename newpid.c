@@ -158,7 +158,7 @@ int
 main (int argc, char *argv[], char *envp[])
 {
 	int opt;
-	while ((opt = getopt(argc, argv, "+in")) != -1) {
+	while ((opt = getopt(argc, argv, "+inu")) != -1) {
 		switch (opt) {
 			case 'i':
 				cloneflags |= CLONE_NEWIPC;
@@ -166,8 +166,11 @@ main (int argc, char *argv[], char *envp[])
 			case 'n':
 				cloneflags |= CLONE_NEWNET;
 				break;
+			case 'u':
+				cloneflags |= CLONE_NEWUTS;
+				break;
 			default: /* '?' */
-				fprintf(stderr, "Usage: %s [-n] [command args ...]\n",
+				fprintf(stderr, "Usage: %s [-inu] [command args ...]\n",
 						argv[0]);
 				exit(EXIT_FAILURE);
 		}
