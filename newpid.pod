@@ -4,7 +4,7 @@ newpid - launch a command in a new PID namespace
 
 =head1 SYNOPSIS
 
-B<newpid> [B<-n>] I<command>
+B<newpid> [B<-in>] I<command>
 
 =head1 DESCRIPTION
 
@@ -15,6 +15,10 @@ also visible there.
 =head1 OPTIONS
 
 =over 4
+
+=item B<-i>
+
+Use B<CLONE_NEWIPC> to run in a new IPC namespace.
 
 =item B<-n>
 

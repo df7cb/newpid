@@ -12,6 +12,8 @@ With -n, CLONE_NEWNET starts a new network namespace. This can be used to test
 multiple daemons that all use the same local port at the same time. Invoking
 "newnet" is equivalent to "newpid -n".
 
+With -i, CLONE_NEWIPC starts a new IPC namespace.
+
 Needed capabilities are CAP_SYS_ADMIN and CAP_NET_ADMIN. Alternatively, newpid
 will drop privileges when installed suid root.
 

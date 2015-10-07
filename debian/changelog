@@ -1,3 +1,9 @@
+newpid (6) UNRELEASED; urgency=medium
+
+  * Add support for CLONE_NEWIPC (newpid -i), and have newnet use it.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 07 Oct 2015 09:44:10 +0200
+
 newpid (5) unstable; urgency=medium
 
   * newpid -n uses CLONE_NEWNET to start a new network namespace.

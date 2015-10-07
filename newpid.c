@@ -36,7 +36,7 @@
 #endif
 
 /* global flags */
-int newnet = 0;
+int cloneflags = 0;
 
 /* get_ctl_fd and do_chflags from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
 static int
@@ -104,7 +104,7 @@ run (void *argv_void)
 	}
 
 	/* set loopback device up */
-	if (newnet) {
+	if (cloneflags & CLONE_NEWNET) {
 		if (do_chflags ("lo", IFF_UP, IFF_UP) < 0)
 			exit (1);
 	}
@@ -158,10 +158,13 @@ int
 main (int argc, char *argv[], char *envp[])
 {
 	int opt;
-	while ((opt = getopt(argc, argv, "+n")) != -1) {
+	while ((opt = getopt(argc, argv, "+in")) != -1) {
 		switch (opt) {
+			case 'i':
+				cloneflags |= CLONE_NEWIPC;
+				break;
 			case 'n':
-				newnet = CLONE_NEWNET;
+				cloneflags |= CLONE_NEWNET;
 				break;
 			default: /* '?' */
 				fprintf(stderr, "Usage: %s [-n] [command args ...]\n",
@@ -176,7 +179,7 @@ main (int argc, char *argv[], char *envp[])
 
 	if ((child = clone (run,
 			cstack + 1024, /* middle of array so we don't care which way the stack grows */
-			CLONE_NEWPID | CLONE_NEWNS | newnet | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
+			CLONE_NEWPID | CLONE_NEWNS | cloneflags | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
 			argv + optind) /* skip argv[0] and options */
 	) < 0) {
 		perror ("clone");
