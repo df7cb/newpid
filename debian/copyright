@@ -1,6 +1,6 @@
 Author, Copyright, and Debianization:
   Copyright 2013-2015 Christoph Berg <myon@debian.org> GPL2+
-get_ctl_fd and do_chflags functions from iproute2:
+get_ctl_fd, do_chflags, netns_switch functions from iproute2:
   Copyright Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+
 
 This program is free software; you can redistribute it and/or modify

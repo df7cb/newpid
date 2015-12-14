@@ -15,6 +15,7 @@
 
 #define _GNU_SOURCE
 #include <errno.h>
+#include <limits.h>
 #include <sched.h>
 #include <signal.h>
 #include <stdio.h>
@@ -23,6 +24,9 @@
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <linux/if.h>
@@ -35,10 +39,13 @@
 #define MS_SLAVE (1<<19)
 #endif
 
+#define NETNS_RUN_DIR "/var/run/netns"
+
 /* global flags */
 int cloneflags = 0;
+char *netns = NULL;
 
-/* get_ctl_fd and do_chflags from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
+/* get_ctl_fd, do_chflags, netns_switch from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
 static int
 get_ctl_fd (void)
 {
@@ -85,6 +92,30 @@ do_chflags (const char *dev, unsigned long flags, unsigned long mask)
 	return 0;
 }
 
+int netns_switch(char *name)
+{
+	char net_path[PATH_MAX];
+	int netns;
+
+	snprintf(net_path, sizeof(net_path), "%s/%s", NETNS_RUN_DIR, name);
+	netns = open(net_path, O_RDONLY | O_CLOEXEC);
+	if (netns < 0) {
+		fprintf(stderr, "Cannot open network namespace \"%s\": %s\n",
+			name, strerror(errno));
+		return -1;
+	}
+
+	if (setns(netns, CLONE_NEWNET) < 0) {
+		fprintf(stderr, "setting the network namespace \"%s\" failed: %s\n",
+			name, strerror(errno));
+		close(netns);
+		return -1;
+	}
+	close(netns);
+
+	return 0;
+}
+
 int
 run (void *argv_void)
 {
@@ -103,10 +134,16 @@ run (void *argv_void)
 		exit (1);
 	}
 
-	/* set loopback device up */
 	if (cloneflags & CLONE_NEWNET) {
-		if (do_chflags ("lo", IFF_UP, IFF_UP) < 0)
-			exit (1);
+		if (netns) {
+			/* join this network namespace */
+			if (netns_switch (netns) < 0)
+				exit (1);
+		} else {
+			/* set loopback device up */
+			if (do_chflags ("lo", IFF_UP, IFF_UP) < 0)
+				exit (1);
+		}
 	}
 
 	/* drop privileges */
@@ -158,11 +195,18 @@ int
 main (int argc, char *argv[], char *envp[])
 {
 	int opt;
-	while ((opt = getopt(argc, argv, "+inu")) != -1) {
+	while ((opt = getopt(argc, argv, "+inN:u")) != -1) {
 		switch (opt) {
 			case 'i':
 				cloneflags |= CLONE_NEWIPC;
 				break;
+			case 'N':
+				if (strncmp(optarg, "newpid", sizeof("newpid")-1)) {
+					fprintf(stderr, "-N argument must start with 'newpid'\n");
+					exit(EXIT_FAILURE);
+				}
+				netns = strdup(optarg);
+				/* fallthrough */
 			case 'n':
 				cloneflags |= CLONE_NEWNET;
 				break;
