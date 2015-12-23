@@ -214,8 +214,13 @@ main (int argc, char *argv[], char *envp[])
 				cloneflags |= CLONE_NEWUTS;
 				break;
 			default: /* '?' */
-				fprintf(stderr, "Usage: %s [-inu] [command args ...]\n",
+				fprintf(stderr, "Usage: %s [options] [command args ...]\n",
 						argv[0]);
+				fprintf(stderr, "Options:\n");
+				fprintf(stderr, "  -i           request new IPC namespace (CLONE_NEWIPC)\n");
+				fprintf(stderr, "  -n           request new network namespace (CLONE_NEWNET)\n");
+				fprintf(stderr, "  -N newpidns  join named network namespace\n");
+				fprintf(stderr, "  -u           request new UTS namespace (CLONE_NEWUTS)\n");
 				exit(EXIT_FAILURE);
 		}
 	}
