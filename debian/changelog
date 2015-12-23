@@ -1,8 +1,8 @@
-newpid (7) UNRELEASED; urgency=medium
+newpid (7) unstable; urgency=medium
 
   * Add support for joining network namespaces (newpid -N).
 
- -- Christoph Berg <myon@debian.org>  Tue, 15 Dec 2015 00:21:29 +0100
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 23 Dec 2015 11:33:12 +0100
 
 newpid (6) unstable; urgency=medium
 
