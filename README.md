@@ -57,4 +57,10 @@ ip netns exec newpidns1 ip a add 10.1.1.2/24 dev veth1
 ip netns exec newpidns1 ip link set veth1 up
 </pre>
 
+Requirements
+------------
+
+The setns() system call first appeared in Linux in kernel 3.0; library support
+was added to glibc in version 2.14.
+
  -- Christoph Berg <myon@debian.org>
