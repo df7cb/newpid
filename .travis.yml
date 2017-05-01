@@ -1,0 +1,14 @@
+# run the testsuite on travis-ci.com
+---
+language: C
+dist: trusty
+sudo: required
+
+install:
+  - sudo apt-get install build-essential debhelper devscripts fakeroot iputils-ping
+
+script:
+  - dpkg-buildpackage -us -uc -rfakeroot
+  - for deb in ../*.deb; do echo "$deb:"; dpkg-deb --info $deb; dpkg-deb --contents $deb; done
+  - sudo debi
+  - LANGUAGE= LANG=C.UTF-8 make check
