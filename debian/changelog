@@ -1,8 +1,12 @@
-newpid (8) UNRELEASED; urgency=medium
+newpid (8) unstable; urgency=medium
 
   * If setcap fails (because the filesystem or namespace lacks support for
     capabilities), fall back to setuid, so the installation doesn't fail.
     Thanks to Adam Conrad for the patch! Closes: #860031
+  * newpid: More verbose usage output.
+  * newnet: Guard arguments with --.
+  * README: Note required kernel and glibc version.
+  * Bump Standards-Version.
 
  -- Christoph Berg <myon@debian.org>  Mon, 01 May 2017 18:15:30 +0200
 
