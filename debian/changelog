@@ -1,3 +1,11 @@
+newpid (8) UNRELEASED; urgency=medium
+
+  * If setcap fails (because the filesystem or namespace lacks support for
+    capabilities), fall back to setuid, so the installation doesn't fail.
+    Thanks to Adam Conrad for the patch! Closes: #860031
+
+ -- Christoph Berg <myon@debian.org>  Mon, 01 May 2017 18:15:30 +0200
+
 newpid (7) unstable; urgency=medium
 
   * Add support for joining network namespaces (newpid -N).

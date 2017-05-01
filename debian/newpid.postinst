@@ -4,7 +4,13 @@ set -e
 
 case $1 in
 	configure)
-		setcap "CAP_SYS_ADMIN,CAP_NET_ADMIN=pe" /usr/bin/newpid
+		# Code cargo-culted from iputils-ping postinst:
+		if setcap "CAP_SYS_ADMIN,CAP_NET_ADMIN=pe" /usr/bin/newpid; then
+			chmod u-s /usr/bin/newpid
+		else
+			echo "Setcap failed on /usr/bin/newpid, falling back to setuid" >&2
+			chmod u+s /usr/bin/newpid
+		fi
 		;;
 esac
 
