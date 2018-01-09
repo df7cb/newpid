@@ -41,6 +41,17 @@
 
 #define NETNS_RUN_DIR "/var/run/netns"
 
+#ifdef __ia64__
+/* ia64 has no clone, instead using __clone2, as it needs to know the size of
+ * the stack allocation to put its register backing store at the other end.
+ * However, it's currently not exposed by glibc; this prototype was copied from
+ * man 2 clone. */
+int __clone2(int (*fn)(void *),
+		void *child_stack_base, size_t stack_size,
+		int flags, void *arg, ...
+		/* pid_t *ptid, struct user_desc *tls, pid_t *ctid */ );
+#endif
+
 /* global flags */
 int cloneflags = 0;
 char *netns = NULL;
@@ -229,10 +240,15 @@ main (int argc, char *argv[], char *envp[])
 	int child;
 	int status;
 
-	if ((child = clone (run,
-			cstack + 1024, /* middle of array so we don't care which way the stack grows */
-			CLONE_NEWPID | CLONE_NEWNS | cloneflags | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
-			argv + optind) /* skip argv[0] and options */
+	if ((child =
+#ifdef __ia64__
+			__clone2 (run, cstack, 2048,
+#else
+			clone (run,
+				cstack + 1024, /* middle of array so we don't care which way the stack grows */
+#endif
+				CLONE_NEWPID | CLONE_NEWNS | cloneflags | SIGCHLD, /* new pid & mount namespace, send SIGCHLD on termination */
+				argv + optind) /* skip argv[0] and options */
 	) < 0) {
 		perror ("clone");
 		exit (1);
