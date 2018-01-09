@@ -1,3 +1,13 @@
+newpid (9) unstable; urgency=medium
+
+  [ James Clarke ]
+  * Use __clone2 on ia64 as it has no clone.
+
+  [ Christoph Berg ]
+  * Bump to DH 11.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Tue, 09 Jan 2018 10:41:56 +0100
+
 newpid (8) unstable; urgency=medium
 
   * If setcap fails (because the filesystem or namespace lacks support for
