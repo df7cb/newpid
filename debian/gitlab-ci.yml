@@ -1,0 +1,48 @@
+stages:
+  - build
+  - autopkgtest
+
+.build: &build
+  stage: build
+  before_script:
+    - apt-get -q update
+    - apt-get -y --no-install-recommends install devscripts fakeroot
+    - apt-get -y --no-install-recommends build-dep .
+    - useradd builduser
+    - chown -R builduser:builduser .
+    - chown builduser:builduser ..
+    - su -c 'origtargz' builduser
+  script:
+    - su -c 'dpkg-buildpackage --no-sign -sa -rfakeroot' builduser
+  after_script:
+    - rm -rf .built && mkdir .built
+    - dcmd mv ../*.changes .built/
+  artifacts:
+    paths:
+      - .built
+
+.test: &test
+  stage: autopkgtest
+  before_script:
+    - apt-get -q update -q
+    - apt-get -y --no-install-recommends install autopkgtest autodep8
+  script:
+    - autopkgtest .built/*.changes -- null
+
+build:testing:
+  <<: *build
+  image: debian:testing
+build:unstable:
+  <<: *build
+  image: debian:sid
+
+test:testing:
+  <<: *test
+  dependencies:
+    - build:testing
+  image: debian:testing
+test:unstable:
+  <<: *test
+  dependencies:
+    - build:unstable
+  image: debian:sid
