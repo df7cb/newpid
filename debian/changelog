@@ -1,3 +1,9 @@
+newpid (10) unstable; urgency=medium
+
+  * newnet.pod: Fix typo "netpid".
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Mon, 18 Feb 2019 14:11:35 +0100
+
 newpid (9) unstable; urgency=medium
 
   [ James Clarke ]
