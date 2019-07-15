@@ -1,3 +1,10 @@
+newpid (11) UNRELEASED; urgency=medium
+
+  * Update testsuite for changed "ping" output in iputils-ping 3:20190515-2.
+    Closes: #931648
+
+ -- Christoph Berg <myon@debian.org>  Mon, 15 Jul 2019 15:07:33 +0200
+
 newpid (10) unstable; urgency=medium
 
   * newnet.pod: Fix typo "netpid".
