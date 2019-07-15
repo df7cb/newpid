@@ -2,11 +2,10 @@ Source: newpid
 Section: utils
 Priority: optional
 Maintainer: Christoph Berg <myon@debian.org>
-Standards-Version: 4.1.3
+Standards-Version: 4.4.0
 Build-Depends: debhelper (>= 11~)
-Vcs-Browser: https://github.com/ChristophBerg/newpid
-Vcs-Git: git://github.com/ChristophBerg/newpid.git
-XS-Testsuite: autopkgtest
+Vcs-Browser: https://github.com/df7cb/newpid
+Vcs-Git: https://github.com/df7cb/newpid.git
 
 Package: newpid
 Architecture: linux-any

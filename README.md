@@ -1,7 +1,7 @@
 newpid
 ======
 
-[![Build Status](https://travis-ci.org/ChristophBerg/newpid.svg?branch=master)](https://travis-ci.org/ChristophBerg/newpid)
+[![Build Status](https://travis-ci.org/df7cb/newpid.svg?branch=master)](https://travis-ci.org/df7cb/newpid)
 
 Newpid is a wrapper around clone(CLONE_NEWPID) that launches a command
 in a new PID namespace. Child processes exiting are properly reaped so no
