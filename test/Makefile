@@ -6,7 +6,7 @@ check: check-zombie check-newnet
 check-zombie:
 	newpid ./zombie.pl 2>&1 | tee zombie.out
 	if grep -q 'version code' zombie.out; then sed -i -e '1,/version code/d' zombie.out; fi # remove "Non-standard uts for running kernel" on lucid
-	diff -u zombie.expected zombie.out
+	diff -ub zombie.expected zombie.out
 
 check-newnet:
 	# remove time/rtt output for reproducibility
