@@ -1,5 +1,9 @@
-newpid (12) UNRELEASED; urgency=medium
+newpid (12) unstable; urgency=medium
 
+  [ Balint Reczey ]
+  * test: Ignore space changes in ps' output.
+
+  [ Christoph Berg ]
   * debian/gitlab-ci.yml: Use standard Salsa CI pipeline.
 
  -- Christoph Berg <myon@debian.org>  Mon, 15 Jul 2019 16:11:01 +0200
