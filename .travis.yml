@@ -5,7 +5,7 @@ dist: bionic
 sudo: required
 
 install:
-  - sudo apt-get install build-essential debhelper fakeroot iputils-ping
+  - sudo apt-get install build-essential debhelper/bionic-backports fakeroot iputils-ping
 
 script:
   - dpkg-buildpackage -us -uc -rfakeroot
