@@ -1,2 +1,3 @@
 Depends: @, iputils-ping
-Tests: check
+Test-Command: make check
+Features: test-name=check
