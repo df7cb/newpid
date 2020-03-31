@@ -1,5 +1,6 @@
 newpid (13) UNRELEASED; urgency=medium
 
+  * Disable stackprotector on arm64, breaks clone().
   * debian/tests: Use Test-Command.
 
  -- Christoph Berg <myon@debian.org>  Tue, 31 Mar 2020 09:56:57 +0200
