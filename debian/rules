@@ -2,10 +2,9 @@
 
 include /usr/share/dpkg/architecture.mk
 
-ifeq ($(DEB_HOST_ARCH),arm64)
-export DEB_BUILD_MAINT_OPTIONS = hardening=+all,-stackprotector
-else
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+ifeq ($(DEB_HOST_ARCH),arm64)
+export DEB_CFLAGS_MAINT_APPEND = -fno-stack-protector
 endif
 
 override_dh_auto_install:
