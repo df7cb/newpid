@@ -11,8 +11,8 @@ check-zombie:
 check-newnet:
 	# remove time/rtt output for reproducibility
 	# iputils-ping 3:20190515-2 added a "ping: " prefix in front of errors, remove it for compatibility
-	( newpid -n ping -q -c 1 -n 127.0.0.1 2>&1 | sed -e 's/\(time\|rtt\).*//'; \
-	  newpid -n ping -q -c 1 -n 192.0.2.1 2>&1 | sed -e 's/^ping: //' \
+	( $(ROOTCMD) newpid -n ping -q -c 1 -n 127.0.0.1 2>&1 | sed -e 's/\(time\|rtt\).*//'; \
+	  $(ROOTCMD) newpid -n ping -q -c 1 -n 192.0.2.1 2>&1 | sed -e 's/^ping: //' \
 	) | tee newnet.out
 	diff -u newnet.expected newnet.out
 

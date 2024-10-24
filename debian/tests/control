@@ -1,3 +1,4 @@
 Depends: @, iputils-ping
-Test-Command: make check
+Test-Command: make check ROOTCMD=sudo
 Features: test-name=check
+Restrictions: needs-sudo
