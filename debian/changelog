@@ -1,3 +1,10 @@
+newpid (14) unstable; urgency=medium
+
+  * ping is no longer suid root; run autopkgtest with sudo.
+    Thanks Noah Meyerhans! (Closes: #1086014)
+
+ -- Christoph Berg <myon@debian.org>  Sun, 10 Nov 2024 15:35:27 +0100
+
 newpid (13) unstable; urgency=medium
 
   * Disable stackprotector on arm64, breaks clone().
