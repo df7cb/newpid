@@ -14,6 +14,6 @@ if (fork == 0) {
 	}
 } else {
 	sleep 2;
-	system "ps -opid,ppid,command xf";
+	system "ps -opid,ppid,command x";
 	exit 0;
 }
