@@ -19,6 +19,34 @@ With -i, CLONE_NEWIPC starts a new IPC namespace.
 
 With -u, CLONE_NEWUTS starts a new UTS namespace.
 
+The command is always started in its own process group, so background
+processes it starts cannot signal the caller's process group with kill(0, ...),
+protecting the invoking shell, a test harness, or other jobs on the same host
+from being taken down by a stray process inside the sandbox.
+
+On top of that, newpid distinguishes two cases automatically:
+
+* **Non-interactive invocations**: none of stdin, stdout and stderr is a
+  terminal (e.g. a pipeline, cron, an ssh call without a pty, or a test
+  harness such as autopkgtest). In this case newpid starts a completely new
+  session with setsid(2): the command gets its own session and process group
+  and no controlling terminal. It can then not signal or interact with
+  anything in the caller's session, making it fully decoupled from the
+  invoking shell (no job control either, but none is needed without a
+  terminal). This is the strongest isolation newpid provides.
+
+* **Interactive invocations**: a standard stream is a terminal. Here the
+  caller's session and controlling terminal are kept so a shell inside behaves
+  normally. The command runs in its own process group and, if it was started
+  as the terminal's foreground process (the normal interactive case), that
+  process group becomes the terminal's foreground group, so interactive shells
+  inside keep full job control and respond to interrupts. Starting newpid in
+  the background leaves the terminal alone.
+
+With -s, a new session is forced with setsid(2) even when a terminal is
+present, detaching from any controlling terminal; interactive shells inside
+then have no job control.
+
 Needed capabilities are CAP_SYS_ADMIN and CAP_NET_ADMIN. Alternatively, newpid
 will drop privileges when installed suid root.
 

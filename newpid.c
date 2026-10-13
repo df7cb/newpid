@@ -55,6 +55,7 @@ int __clone2(int (*fn)(void *),
 /* global flags */
 int cloneflags = 0;
 char *netns = NULL;
+int newsession = 0;
 
 /* get_ctl_fd, do_chflags, netns_switch from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
 static int
@@ -127,6 +128,22 @@ int netns_switch(char *name)
 	return 0;
 }
 
+/* Make the new process group the foreground group of the controlling
+ * terminal, so that interactive shells inside can read from the terminal and
+ * get job control. We are currently in the background, so ignore SIGTTOU while
+ * reordering the foreground group (the same trick shells use). */
+static void
+become_foreground (int fd)
+{
+	struct sigaction sa, oldsa;
+
+	memset (&sa, 0, sizeof (sa));
+	sa.sa_handler = SIG_IGN;
+	sigaction (SIGTTOU, &sa, &oldsa);
+	tcsetpgrp (fd, getpgrp ());
+	sigaction (SIGTTOU, &oldsa, NULL);
+}
+
 int
 run (void *argv_void)
 {
@@ -161,6 +178,53 @@ run (void *argv_void)
 	if (setuid(getuid()) != 0) {
 		perror ("setuid");
 		exit (1);
+	}
+
+	if (newsession) {
+		/* -s: start a new session and process group, detached from the
+		 * controlling terminal. This additionally isolates the command
+		 * from the caller's session and terminal. */
+		if (setsid () < 0) {
+			perror ("setsid");
+			exit (1);
+		}
+	} else {
+		pid_t orig_pgrp;
+		int fd;
+		int have_tty = 0;
+
+		orig_pgrp = getpgrp ();
+		for (fd = 0; fd <= 2; fd++)
+			if (isatty (fd)) {
+				have_tty = 1;
+				break;
+			}
+
+		if (!have_tty) {
+			/* non-interactive invocation (no standard stream is a terminal):
+			 * use the strongest isolation, a new session, so the command
+			 * cannot signal anything in the caller's session or process
+			 * group, and no controlling terminal is inherited. */
+			if (setsid () < 0) {
+				perror ("setsid");
+				exit (1);
+			}
+		} else {
+			/* interactive: keep the caller's session and controlling
+			 * terminal, but put the command in its own process group, so
+			 * that background processes it starts cannot signal the
+			 * caller's process group (e.g. the invoking shell). */
+			if (setpgid (0, 0) < 0) {
+				perror ("setpgid");
+				exit (1);
+			}
+			/* if we were started as the terminal's foreground process, make
+			 * our new process group the foreground group, so that
+			 * interactive shells inside keep full job control. Starting
+			 * newpid in the background must not steal the terminal. */
+			if (tcgetpgrp (fd) == orig_pgrp)
+				become_foreground (fd);
+		}
 	}
 
 	if (argv[0] == NULL) {
@@ -206,7 +270,7 @@ int
 main (int argc, char *argv[], char *envp[])
 {
 	int opt;
-	while ((opt = getopt(argc, argv, "+inN:u")) != -1) {
+	while ((opt = getopt(argc, argv, "+inN:us")) != -1) {
 		switch (opt) {
 			case 'i':
 				cloneflags |= CLONE_NEWIPC;
@@ -224,6 +288,9 @@ main (int argc, char *argv[], char *envp[])
 			case 'u':
 				cloneflags |= CLONE_NEWUTS;
 				break;
+			case 's':
+				newsession = 1;
+				break;
 			default: /* '?' */
 				fprintf(stderr, "Usage: %s [options] [command args ...]\n",
 						argv[0]);
@@ -232,6 +299,7 @@ main (int argc, char *argv[], char *envp[])
 				fprintf(stderr, "  -n           request new network namespace (CLONE_NEWNET)\n");
 				fprintf(stderr, "  -N newpidns  join named network namespace\n");
 				fprintf(stderr, "  -u           request new UTS namespace (CLONE_NEWUTS)\n");
+				fprintf(stderr, "  -s           run command in a new session (setsid(2))\n");
 				exit(EXIT_FAILURE);
 		}
 	}

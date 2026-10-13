@@ -1,3 +1,20 @@
+newpid (15) unstable; urgency=medium
+
+  * Start commands in their own process group (setpgid(0, 0)) so that
+    background processes started inside cannot signal the caller's process
+    group, e.g. an invoking shell or test harness.
+    When no standard stream is a terminal, start a new session (setsid(2))
+    instead, for maximum isolation from the caller's session and host.
+    Interactive use keeps the caller's session and terminal: the command runs
+    in its own process group and claims the foreground terminal group when
+    started as the terminal's foreground process, so shells inside keep full
+    job control.
+    Add -s to force setsid(2) even when a terminal is present.
+    Add a regression test to make check that a kill(0, SIGTERM) issued inside
+    the sandbox cannot reach the test harness.
+
+ -- Christoph Berg <myon@debian.org>  Tue, 13 Oct 2026 23:14:50 +0200
+
 newpid (14) unstable; urgency=medium
 
   * ping is no longer suid root; run autopkgtest with sudo.

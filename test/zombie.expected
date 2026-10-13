@@ -1,5 +1,5 @@
-  PID  PPID COMMAND
-    1     0 newpid ./zombie.pl
-    2     1 /usr/bin/perl ./zombie.pl
-    3     2  \_ [zombie.pl] <defunct>
-    5     2  \_ ps -opid,ppid,command xf
+    PID    PPID COMMAND
+      1       0 newpid ./zombie.pl
+      2       1  \_ /usr/bin/perl ./zombie.pl
+      3       2      \_ [zombie.pl] <defunct>
+      5       2      \_ ps -opid,ppid,command xf

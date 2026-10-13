@@ -4,13 +4,32 @@ newpid - launch a command in a new PID namespace
 
 =head1 SYNOPSIS
 
-B<newpid> [B<-inNu>] I<command>
+B<newpid> [B<-inNus>] I<command>
 
 =head1 DESCRIPTION
 
 B<newpid> uses the B<clone(CLONE_NEWPID)> syscall to launch a command in a new
 PID namespace. The B</proc> filesystem is remounted so the new process IDs are
 also visible there.
+
+The command is always started in its own process group, so background
+processes it starts cannot signal the caller's process group with
+B<kill(0, ...)>, protecting the invoking shell, a test harness, or other jobs
+on the same host from being taken down by a stray process inside the sandbox.
+
+On top of that, B<newpid> distinguishes two cases automatically. If none of the
+standard streams is a terminal - a pipeline, cron, an S<ssh> call without a
+pty, or a test harness such as autopkgtest - a completely new session is
+started with B<setsid(2)>: the command gets its own session and process group
+and no controlling terminal, so it cannot signal or interact with anything in
+the caller's session, and is fully decoupled from the invoking shell. This is
+the strongest isolation B<newpid> provides. If a standard stream is a terminal,
+the caller's session and controlling terminal are kept so a shell inside
+behaves normally: the command runs in its own process group and, if it was
+started as the terminal's foreground process (the normal interactive case),
+that process group becomes the terminal's foreground group, so interactive
+shells inside keep full job control; if B<newpid> is started in the
+background, the terminal is left alone.
 
 =head1 OPTIONS
 
@@ -32,6 +51,15 @@ network namespace. The name must start with B<newpid>.
 =item B<-u>
 
 Use B<CLONE_NEWUTS> to run in a new UTS namespace.
+
+=item B<-s>
+
+Always start a new session and process group with B<setsid(2)>, detached from
+any controlling terminal, even when a terminal is present. Without B<-s>, a new
+session is only used when none of the standard streams is a terminal; when run
+interactively the command stays in the caller's session and runs in its own
+process group. On a terminal, B<-s> means interactive shells inside have no
+controlling terminal and no job control.
 
 =back
 
