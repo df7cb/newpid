@@ -334,8 +334,15 @@ main (int argc, char *argv[], char *envp[])
 		exit (1);
 	}
 
-	if (waitpid (child, &status, 0) < 0) {
+	/* wait for the clone child, retrying EINTR; only read status after
+	 * waitpid() succeeded, since it is not set on error */
+	for (;;) {
+		if (waitpid (child, &status, 0) >= 0)
+			break;
+		if (errno == EINTR)
+			continue;	/* interrupted by a signal, retry */
 		perror ("waitpid");
+		return -1;
 	}
 
 	if (WIFEXITED (status))
