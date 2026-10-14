@@ -44,6 +44,13 @@ On top of that, newpid distinguishes two cases automatically:
   inside keep full job control and respond to interrupts. Starting newpid in
   the background leaves the terminal alone.
 
+Because the command is isolated in its own session/process group, an abort
+directed at the caller (e.g. a process-group kill from a test harness or CI
+agent) can no longer reach it. newpid therefore forwards SIGHUP, SIGINT,
+SIGQUIT and SIGTERM to the command, so terminating newpid also terminates the
+sandbox. If newpid is hard-killed (SIGKILL cannot be caught), the command is
+notified via the parent-death signal instead.
+
 With -s, a new session is forced with setsid(2) even when a terminal is
 present, detaching from any controlling terminal; interactive shells inside
 then have no job control.

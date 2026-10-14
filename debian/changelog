@@ -18,6 +18,12 @@ newpid (15) unstable; urgency=medium
     PATH_MAX buffer on the small clone stack is gone.
   * newpid: retry waitpid() on EINTR in main() and don't fall back on an
     uninitialized exit status when it fails.
+  * Forward SIGHUP/SIGINT/SIGQUIT/SIGTERM received by newpid to the command
+    (main() -> run() -> command), so aborting newpid also stops the sandbox,
+    which now runs in its own session/process group and is otherwise
+    unreachable by process-group kills; on a hard kill (SIGKILL) the command
+    is notified via the parent-death signal instead. Add a check-signal
+    regression test to make check.
 
  -- Christoph Berg <myon@debian.org>  Tue, 13 Oct 2026 23:14:50 +0200
 

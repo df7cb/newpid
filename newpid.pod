@@ -31,6 +31,13 @@ that process group becomes the terminal's foreground group, so interactive
 shells inside keep full job control; if B<newpid> is started in the
 background, the terminal is left alone.
 
+Because the command is isolated in its own session and process group, an abort
+directed at the caller (a process-group kill) can no longer reach it.
+Therefore B<newpid> installs handlers for B<SIGHUP>, B<SIGINT>, B<SIGQUIT> and
+B<SIGTERM> and forwards them to the command, so terminating B<newpid> also
+terminates the sandbox. If B<newpid> is hard-killed (B<SIGKILL> cannot be
+caught), the command is notified via the parent-death signal instead.
+
 =head1 OPTIONS
 
 =over 4

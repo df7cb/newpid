@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -56,6 +57,10 @@ int __clone2(int (*fn)(void *),
 int cloneflags = 0;
 char *netns = NULL;
 int newsession = 0;
+
+/* async-signal-safe forwarding: run() forwards to the command, main() to
+ * run(); the handler only touches this and kill() */
+static volatile sig_atomic_t forward_pid;
 
 /* get_ctl_fd, do_chflags, netns_switch from iproute2 (C) Alexey Kuznetsov <kuznet@ms2.inr.ac.ru> GPL2+ */
 static int
@@ -154,6 +159,32 @@ become_foreground (int fd)
 	sigaction (SIGTTOU, &oldsa, NULL);
 }
 
+/* Forward termination signals to forward_pid, so that aborting newpid also
+ * stops the command. This is needed because the command runs in its own
+ * session and process group: a process-group kill directed at the caller can
+ * no longer reach it, so it would otherwise keep running after an abort. The
+ * handlers also make the signal get delivered at all, since run() is PID 1 in
+ * its namespace and unhandled signals are ignored there. */
+static void
+forward_signal (int sig)
+{
+	if (forward_pid > 0)
+		kill (forward_pid, sig);
+}
+
+static void
+install_forward_handler (void)
+{
+	struct sigaction sa;
+	static const int signals[] = { SIGHUP, SIGINT, SIGQUIT, SIGTERM };
+	unsigned int i;
+
+	memset (&sa, 0, sizeof (sa));
+	sa.sa_handler = forward_signal;
+	for (i = 0; i < sizeof (signals) / sizeof (signals[0]); i++)
+		sigaction (signals[i], &sa, NULL);
+}
+
 int
 run (void *argv_void)
 {
@@ -161,6 +192,15 @@ run (void *argv_void)
 	char *argv_sh[] = { NULL, NULL };
 	pid_t child;
 	pid_t pid;
+
+	/* relay termination signals to the command once it is forked; also have
+	 * the kernel notify us via SIGHUP if main() is hard-killed (SIGKILL can't
+	 * be caught or forwarded), closing the abort-leak for that case too */
+	install_forward_handler ();
+	if (prctl (PR_SET_PDEATHSIG, SIGHUP) != 0) {
+		perror ("prctl(PR_SET_PDEATHSIG)");
+		exit (1);
+	}
 
 	if (mount("none", "/proc", NULL, MS_SLAVE|MS_REC, NULL) != 0) {
 		perror ("remount proc private");
@@ -258,6 +298,7 @@ run (void *argv_void)
 		perror ("fork");
 		exit (1);
 	}
+	forward_pid = child;	/* forward signals to the command */
 
 	int status;
 	while ((pid = wait (&status)) != child) {
@@ -320,6 +361,10 @@ main (int argc, char *argv[], char *envp[])
 	int child;
 	int status;
 
+	/* forward termination signals to the sandbox (see run()); installed
+	 * before clone() so we don't miss an early abort */
+	install_forward_handler ();
+
 	if ((child =
 #ifdef __ia64__
 			__clone2 (run, cstack, 2048,
@@ -333,6 +378,7 @@ main (int argc, char *argv[], char *envp[])
 		perror ("clone");
 		exit (1);
 	}
+	forward_pid = child;	/* forward signals to run() */
 
 	/* wait for the clone child, retrying EINTR; only read status after
 	 * waitpid() succeeded, since it is not set on error */

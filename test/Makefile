@@ -1,7 +1,7 @@
 # output error messages in English
 export LC_MESSAGES=C
 
-check: check-zombie check-newnet check-isolation check-netns-name
+check: check-zombie check-newnet check-isolation check-netns-name check-signal
 
 check-zombie:
 	newpid ./zombie.pl 2>&1 | tee zombie.out
@@ -42,6 +42,23 @@ check-netns-name:
 	else \
 		echo "netns-name: OK ('other' rejected)"; \
 	fi
+
+check-signal:
+	# SIGTERM sent to newpid must be forwarded into the sandbox: the command
+	# runs in its own session/process group, so a group kill can no longer
+	# reach it and the termination has to be relayed main() -> run() ->
+	# command. The command's own TERM trap (exit 42) proves the signal
+	# arrived; 143 is accepted too. The timeout guard keeps a broken forward
+	# from hanging the test run.
+	timeout -k 2 15 newpid sh -c 'trap "exit 42" TERM; while :; do sleep 1; done' & \
+	NP=$$!; \
+	sleep 1; \
+	kill -TERM $$NP; \
+	wait $$NP; RC=$$?; \
+	if test "$$RC" != "42" && test "$$RC" != "143"; then \
+		echo "FAIL: signal forwarding broken (exit=$$RC)"; exit 1; \
+	fi; \
+	echo "signal: OK (exit=$$RC)"
 
 clean:
 	rm -f zombie.out newnet.out
