@@ -1,7 +1,7 @@
 # output error messages in English
 export LC_MESSAGES=C
 
-check: check-zombie check-newnet check-isolation
+check: check-zombie check-newnet check-isolation check-netns-name
 
 check-zombie:
 	newpid ./zombie.pl 2>&1 | tee zombie.out
@@ -28,6 +28,20 @@ check-isolation:
 		echo "isolation: OK (sandbox terminated itself on kill(0), as expected)"; \
 	fi; \
 	trap - TERM
+
+check-netns-name:
+	# -N namespace names must start with 'newpid' AND contain no '/' (both
+	# rejections happen in main() before clone(), so no privileges needed).
+	if newpid -N 'newpid/../..' true >/dev/null 2>&1; then \
+		echo "FAIL: '-N newpid/../..' was not rejected"; exit 1; \
+	else \
+		echo "netns-name: OK ('newpid/../..' rejected)"; \
+	fi
+	if newpid -N other true >/dev/null 2>&1; then \
+		echo "FAIL: '-N other' was not rejected"; exit 1; \
+	else \
+		echo "netns-name: OK ('other' rejected)"; \
+	fi
 
 clean:
 	rm -f zombie.out newnet.out

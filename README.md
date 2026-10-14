@@ -13,7 +13,8 @@ multiple daemons that all use the same local port at the same time. Invoking
 "newnet" is equivalent to "newpid -n".
 
 -N is similar to -n, but joins a preconfigured network namespace whose name
-must start with "newpid". See below for an example.
+must start with "newpid" and contain no '/'; it refers to an entry inside
+/var/run/netns. See below for an example.
 
 With -i, CLONE_NEWIPC starts a new IPC namespace.
 

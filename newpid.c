@@ -1,6 +1,6 @@
 /*
  * newpid: launch a subprocess in a new PID namespace
- * Copyright (C) 2013-2015 Christoph Berg <myon@debian.org>
+ * Copyright (C) 2013-2026 Christoph Berg <myon@debian.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,11 +106,21 @@ do_chflags (const char *dev, unsigned long flags, unsigned long mask)
 
 int netns_switch(char *name)
 {
-	char net_path[PATH_MAX];
 	int netns;
+	int netns_dir;
 
-	snprintf(net_path, sizeof(net_path), "%s/%s", NETNS_RUN_DIR, name);
-	netns = open(net_path, O_RDONLY | O_CLOEXEC);
+	/* open the namespace directory once and resolve name relative to it, so
+	 * no path is built and (with the '/' check in main()) the name can only
+	 * ever refer to a single entry inside NETNS_RUN_DIR */
+	netns_dir = open(NETNS_RUN_DIR, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+	if (netns_dir < 0) {
+		fprintf(stderr, "Cannot open network namespace directory %s: %s\n",
+			NETNS_RUN_DIR, strerror(errno));
+		return -1;
+	}
+
+	netns = openat(netns_dir, name, O_RDONLY | O_CLOEXEC);
+	close(netns_dir);
 	if (netns < 0) {
 		fprintf(stderr, "Cannot open network namespace \"%s\": %s\n",
 			name, strerror(errno));
@@ -276,8 +286,10 @@ main (int argc, char *argv[], char *envp[])
 				cloneflags |= CLONE_NEWIPC;
 				break;
 			case 'N':
-				if (strncmp(optarg, "newpid", sizeof("newpid")-1)) {
-					fprintf(stderr, "-N argument must start with 'newpid'\n");
+				if (strncmp(optarg, "newpid", sizeof("newpid")-1) ||
+				    strchr(optarg, '/')) {
+					fprintf(stderr,
+						"-N argument must start with 'newpid' and contain no '/'\n");
 					exit(EXIT_FAILURE);
 				}
 				netns = strdup(optarg);

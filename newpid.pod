@@ -46,7 +46,8 @@ Use B<CLONE_NEWNET> to run in a new network namespace.
 =item B<-N> B<newpid>I<name>
 
 Use B<CLONE_NEWNET> to run in a new network namespace, and join an existing
-network namespace. The name must start with B<newpid>.
+network namespace. The name must start with B<newpid> and must not contain a
+slash; it refers to an entry inside F</var/run/netns>.
 
 =item B<-u>
 

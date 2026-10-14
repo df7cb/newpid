@@ -12,6 +12,10 @@ newpid (15) unstable; urgency=medium
     Add -s to force setsid(2) even when a terminal is present.
     Add a regression test to make check that a kill(0, SIGTERM) issued inside
     the sandbox cannot reach the test harness.
+  * newpid -N: reject namespace names containing '/', and open them with
+    openat() relative to /var/run/netns instead of building a full path, so a
+    name can only ever refer to a single entry inside that directory and the
+    PATH_MAX buffer on the small clone stack is gone.
 
  -- Christoph Berg <myon@debian.org>  Tue, 13 Oct 2026 23:14:50 +0200
 
